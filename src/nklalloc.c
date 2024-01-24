@@ -34,7 +34,7 @@ void *arena_malloc(Arena *a, ptrdiff_t size, ptrdiff_t align, uint32_t flags) {
     return NULL;
   {
     void *o;
-    ptrdiff_t pad = (~((uintptr_t)(a->beg + a->off) & (align - 1)) + 1) & (align - 1);
+    ptrdiff_t pad = -(uintptr_t)(a->beg + a->off) & (align - 1);
     ptrdiff_t padded_size = size + pad;
     if (padded_size > a->end - a->beg - a->off) {
       if (flags & ARENA_OOM_HARDFAIL)

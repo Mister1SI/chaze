@@ -26,12 +26,11 @@
 #     RLS_LD        | Compiler and linker used for release mode
 
 # SOURCES
-SOURCES_INCLUDE_TYPE = include
-SOURCES_INCLUDE = type_example.c
-SOURCES_EXCLUDE = type_sizes.c
+SOURCES_INCLUDE_TYPE = exclude
+SOURCES_INCLUDE =
+SOURCES_EXCLUDE =
 
 # DEBUG
-DBG_EXE = debug
 DBG_FLAGS = -std=c11 -I./include/ -gdwarf-2 -Wall -Wextra -Wpedantic -Werror -fsanitize=address
 DBG_CFLAGS =
 DBG_LDFLAGS =
@@ -39,7 +38,6 @@ DBG_LIBS =
 DBG_LD = clang
 
 # RELEASE
-RLS_EXE = release
 RLS_FLAGS = -std=c11 -I./include/ -O3
 RLS_CFLAGS =
 RLS_LDFLAGS =
@@ -60,23 +58,29 @@ endif
 
 # debug mode make targets
 DBG_OBJECTS =$(patsubst src/%.c,obj/dbg/%.o, $(SOURCES))
+DBG_SOBJECTS =$(patsubst src/%.c,bin/lib%_dbg.so, $(SOURCES))
 
 cdebug: $(DBG_OBJECTS)
 
-debug: $(DBG_OBJECTS)
-	$(DBG_LD) $(DBG_FLAGS) $(DBG_LDFLAGS) $(DBG_OBJECTS) -o bin/$(DBG_EXE) $(DBG_LIBS)
+debug: $(DBG_SOBJECTS)
+
+bin/lib%_dbg.so: obj/dbg/%.o
+	$(DBG_LD) -shared $(DBG_FLAGS) $(DBG_LDFLAGS) $< -o $@
 
 obj/dbg/%.o: src/%.c
-	$(DBG_LD) $(DBG_FLAGS) $(DBG_CFLAGS) -c $< -o $@
+	$(DBG_LD) -fPIC $(DBG_FLAGS) $(DBG_CFLAGS) -c $< -o $@
 
 # release mode make targets
 RLS_OBJECTS =$(patsubst src/%.c,obj/rls/%.o, $(SOURCES))
+RLS_SOBJECTS =$(patsubst src/%.c,bin/lib%.so, $(SOURCES))
 
 crelease: $(RLS_OBJECTS)
 
-release: $(RLS_OBJECTS)
-	$(RLS_LD) $(RLS_FLAGS) $(RLS_LDFLAGS) $(RLS_OBJECTS) -o bin/$(RLS_EXE) $(RLS_LIBS)
+release: $(RLS_SOBJECTS)
+
+bin/lib%.so: obj/rls/%.o
+	$(RLS_LD) -shared $(RLS_FLAGS) $(RLS_LDFLAGS) $< -o $@
 
 obj/rls/%.o: src/%.c
-	$(RLS_LD) $(RLS_FLAGS) $(RLS_CFLAGS) -c $< -o $@
+	$(RLS_LD) -fPIC $(RLS_FLAGS) $(RLS_CFLAGS) -c $< -o $@
 

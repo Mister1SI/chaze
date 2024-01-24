@@ -71,3 +71,5 @@ extern str8_t _nkl_str8_make(const char *s, const int32_t size);
 #define STR8(s) ((str8_t) {s, (int32_t)(sizeof(s) - 1)})
 #endif
 
+#endif
+
